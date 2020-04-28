@@ -1,0 +1,40 @@
+version: '3.5'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rizzo_account-rabbitmq
+    hostname: rizzo_account-rabbitmq # database unique name
+    networks:
+      - rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=rizzo_account
+      - RABBITMQ_DEFAULT_PASS=rizzo_account
+      - RABBITMQ_ERLANG_COOKIE=rizzo_accountrabbitmqservice
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  flower:
+    image: hugoseabra19/docker-celery-flower
+    container_name: rizzo_account-flower
+    environment:
+      - CELERY_BROKER_URL=amqp://rizzo_account:rizzo_account@rabbitmq:5672/
+      - FLOWER_PORT=5555
+    ports:
+      - 5555:5555
+    networks:
+      - rabbitmq
+
+  mailhog:
+    image: blueimp/mailhog
+    container_name: rizzo_account-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  pgadmin_data:
+
+networks:
+  rabbitmq:
+    name: local_rabbitmq

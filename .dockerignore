@@ -1,0 +1,9 @@
+.idea
+.git
+.drone.yml
+.pylintrc
+README.md
+project/.env
+media/
+doc/
+db.sqlite3

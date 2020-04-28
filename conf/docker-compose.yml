@@ -1,0 +1,30 @@
+version: "3.5"
+
+networks:
+  net_lb:
+    external: true
+
+services:
+  policy:
+    image: startupgo/startupgo-policy:latest
+    restart: unless-stopped
+    hostname: policy
+    env_file: .env
+    ports:
+      - "8000"
+    networks:
+      - net_lb
+    entrypoint:
+      - /app_conf/services/web.sh
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./shared-volume/media:/code/media
+      - ./db.sqlite3:/code/db.sqlite3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:;PathPrefix:/policies"
+      - "traefik.http.routers.rizzo_account.rule=Host(`api.startupgo.org`) && PathPrefix(`/policies`)"
+      - "traefik.http.routers.rizzo_account.entrypoints=web"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=net_lb"
+      - "traefik.frontend.passHostHeader=true"
