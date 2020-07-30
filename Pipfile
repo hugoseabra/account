@@ -12,28 +12,26 @@ flake8 = "*"
 
 [packages]
 django = "*"
-
 # Core
 inquirer = "*"
 drf-nested-routers = "*"
 jsonfield2 = "*"
 django-url-filter = "*"
 django-localflavor = "*"
-
 # settings
 python-decouple = "*"
 dj-database-url = "*"
 uwsgi = "*"
 psycopg2-binary = "*"
-
 # Rest
 djangorestframework = "*"
 django-cors-middleware = "*"
-
 # Project
 django-oauth-toolkit = "*"
 cryptography = "*"
 pyjwt = {extras = ["crypto"],version = "*"}
+celery = "*"
+django-stdimage = "*"
 
 [requires]
 python_version = "3.7"

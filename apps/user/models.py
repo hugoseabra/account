@@ -174,3 +174,9 @@ class User(UUIDPkMixin,
     def save(self, *args, **kwargs):
         self.username = self.email
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.email
+
+    def __repr__(self):
+        return f'<User username={self.email} />'

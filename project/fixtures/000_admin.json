@@ -1,0 +1,22 @@
+[
+  {
+    "model": "user.user",
+    "pk": "8376d436-940c-4121-b07f-92d22a8fb791",
+    "fields": {
+      "password": "pbkdf2_sha256$180000$UQxqt6XwYQ9z$2semCJA7u3o+2WZrPGjMzKPiuYufm4jJmtRhg7BUpyc=",
+      "last_login": "2020-07-30T04:08:23Z",
+      "is_superuser": true,
+      "created_at": "2020-07-30T04:07:59.857Z",
+      "updated_at": "2020-07-30T04:14:34.179Z",
+      "email": "admin@admin.org",
+      "first_name": "Admin",
+      "last_name": "Org",
+      "is_staff": true,
+      "is_active": true,
+      "cpf": "27929922049",
+      "date_joined": "2020-07-30T04:07:59Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  }
+]

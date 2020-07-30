@@ -11,12 +11,13 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+
 from decouple import config, Csv
 from dj_database_url import parse as db_url
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from django.urls import reverse_lazy
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -30,7 +31,6 @@ DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv(), default="*")
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,9 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    # rest-framework
+    'rest_framework',
+    'stdimage',
 
     # apps
     'apps.user',
+    'apps.avatar',
 ]
 
 if DEBUG:
@@ -80,6 +86,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+SITE_ID = 1
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -89,25 +98,6 @@ _DEFAULT_DB = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
 DATABASES = {
     "default": config("DATABASE_URL", default=_DEFAULT_DB, cast=db_url)
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -119,11 +109,85 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
 
-STATIC_URL = "/static/"
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
-AUTH_USER_MODEL = "user.User"
-CORS_ORIGIN_ALLOW_ALL = True
+# ========================= USER CONFIGURATION ============================== #
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Tell Django about the custom `User` model we created. The string
+# `authentication.User` tells Django we are referring to the `User` model in
+# the `authentication` module. This module is registered above in a setting
+# called `INSTALLED_APPS`.
+AUTH_USER_MODEL = 'user.User'
+
+LOGIN_URL = reverse_lazy('registration:login')
+LOGOUT_URL = reverse_lazy('registration:logout')
+# LOGIN_REDIRECT_URL = reverse_lazy('driver:driver-list')
+LOGOUT_REDIRECT_URL = reverse_lazy('registration:login')
+
+AVATAR_GRAVATAR_DEFAULT = 'mp'
+AVATAR_GRAVATAR_FORCEDEFAULT = True
+AVATAR_MAX_AVATARS_PER_USER = 1
+AVATAR_DEFAULT_URL = 'assets/img/generic_avatar.png'
+AVATAR_AUTO_GENERATE_SIZES = [65, 80, 180]
+
+AVATAR_MAX_SIZE = 4096
+# ============================ VALIDATORS =================================== #
+# Password validation
+# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 6,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# ============================ FIXTURES ===================================== #
+FIXTURE_DIRS = [
+    os.path.join(BASE_DIR, 'project', 'fixtures'),
+]
+# ============================= DRF ========================================= #
+REST_FRAMEWORK = {
+    # if you want with milliseconds or
+    'DATETIME_FORMAT': '%s',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 50,
+
+    # Authentication Method.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+}
+
+# =============================== CELERY ==================================== #
+# CELERY
+CELERY_BROKER_URL = 'amqp://{user}:{password}@{server}:5672/'.format(
+    user=config('CELERY_USER', default='admin', cast=str),
+    password=config('CELERY_USER', default='admin', cast=str),
+    server=config('CELERY_USER', default='localhost', cast=str),
+)
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = TIME_ZONE
