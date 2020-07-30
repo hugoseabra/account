@@ -126,8 +126,10 @@ venv.bak/
 
 # vscode
 .vscode/
+.idea/
 
 /static/
+/media/
 
 /media_root/
 celerybeat-schedule.db
