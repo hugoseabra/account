@@ -5,11 +5,15 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from apps.user import constants
 from core.models.mixins import (
     UUIDPkMixin,
     DateTimeManagementMixin,
+    EntityMixin,
 )
 from core.validators import cpf_validator
+from .pin import Pin
+from ..exceptions import PinCreationImpossibility
 
 
 class UserManager(BaseUserManager):
@@ -82,6 +86,7 @@ class UserManager(BaseUserManager):
 
 class User(UUIDPkMixin,
            DateTimeManagementMixin,
+           EntityMixin,
            AbstractBaseUser,
            PermissionsMixin):
     """
@@ -134,13 +139,41 @@ class User(UUIDPkMixin,
             "Unselect this instead of deleting accounts."
         ),
     )
+    is_validated = models.BooleanField(
+        verbose_name=_("validated"),
+        default=False,
+        help_text=_(
+            "Designates whether this user should be treated as validated. "
+            "This is taken actively by the user itself though a proof that "
+            "his has access to the provided e-mail."
+        ),
+    )
+    password_deactivated = models.BooleanField(
+        verbose_name=_("password deactivated"),
+        default=False,
+        help_text=_(
+            "Designates whether this user must redefine his password. "
+            "When, we assume the current password is not valid."
+        ),
+    )
     cpf = models.CharField(
         verbose_name='CPF',
         max_length=11,
         blank=True,
         null=True,
+        unique=True,
         validators=[cpf_validator]
     )
+
+    avatar_type = models.CharField(
+        verbose_name=_('type'),
+        max_length=8,
+        choices=constants.AVATAR_TYPES,
+        default=constants.AVATAR_INTERNAL,
+        null=False,
+        blank=False,
+    )
+
     date_joined = models.DateTimeField(
         verbose_name=_('date joined'),
         default=timezone.now,
@@ -149,12 +182,27 @@ class User(UUIDPkMixin,
 
     @property
     def cpf_formatted(self):
+        if not self.cpf:
+            return None
+
         return '{0}.{1}.{2}-{3}'.format(
             self.cpf[:3],
             self.cpf[3:6],
             self.cpf[6:9],
             self.cpf[9:11]
         )
+
+    @property
+    def avatar(self):
+        return self.avatars.filter(main=True).first()
+
+    @property
+    def is_gravatar_avatar(self):
+        return self.avatar_type == constants.AVATAR_GRAVATAR
+
+    @property
+    def is_internal_avatar(self):
+        return self.avatar_type == constants.AVATAR_INTERNAL
 
     def clean(self):
         super().clean()
@@ -174,6 +222,90 @@ class User(UUIDPkMixin,
     def save(self, *args, **kwargs):
         self.username = self.email
         super().save(*args, **kwargs)
+
+    def deactivate_password(self):
+        self.password_deactivated = True
+        self.password = None
+        self.save()
+
+    def get_validation_pin(self):
+        pin = None
+        try:
+            if self.pin.is_validation_pin is True:
+                pin = self.pin
+
+        except Pin.DoesNotExist:
+            pass
+
+        return pin
+
+    def get_password_reset_pin(self):
+        pin = None
+        try:
+            if self.pin.is_password_reset_pin is True:
+                pin = self.pin
+
+        except Pin.DoesNotExist:
+            pass
+
+        return pin
+
+    def create_or_renew_validation_pin(self):
+        if self.is_new is True:
+            raise PinCreationImpossibility(_(
+                'You cannot create PIN before saving the user.'
+            ))
+
+        if self.is_validated is True:
+            raise PinCreationImpossibility(_(
+                'You cannot create PIN to validate an account when the user'
+                ' is already validated.'
+            ))
+
+        pin = self.get_validation_pin()
+
+        if pin:
+            if pin.is_expired is True:
+                pin.renew()
+        else:
+            pin = Pin.objects.create(
+                user=self,
+                pin_type=constants.PIN_TYPE_VALIDATION
+            )
+
+        return pin
+
+    def create_or_renew_password_pin(self):
+        if self.is_new is True:
+            raise PinCreationImpossibility(_(
+                'You cannot create PIN before saving the user.'
+            ))
+
+        if self.is_validated is False:
+            raise PinCreationImpossibility(_(
+                'You cannot create PIN to reset password when the user'
+                ' is validated yet.'
+            ))
+
+        pin = self.get_password_reset_pin()
+        if pin:
+            if pin.is_expired is True:
+                pin.renew()
+        else:
+            pin = Pin.objects.create(
+                user=self,
+                pin_type=constants.PIN_TYPE_PASS_RESET
+            )
+
+        return pin
+
+    def validate(self):
+        self.is_validated = True
+        self.save()
+
+        pin = self.get_validation_pin()
+        if pin:
+            pin.delete()
 
     def __str__(self):
         return self.email

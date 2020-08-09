@@ -1,0 +1,14 @@
+[
+  {
+    "model": "user.pin",
+    "pk": "69eedec4-43f3-41ba-a91e-2310f041c583",
+    "fields": {
+      "created_at": "2020-08-09T01:48:00.213Z",
+      "updated_at": "2020-08-09T01:48:00.213Z",
+      "user": "8376d436-940c-4121-b07f-92d22a8fb791",
+      "pin_type": "account_validation",
+      "exp_date": "2020-08-11T01:48:00.213Z",
+      "pin": "81358136"
+    }
+  }
+]
