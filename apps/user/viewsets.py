@@ -130,7 +130,7 @@ class AccountValidationViewset(FieldRequestViewsetMixin, GenericViewSet):
         pin = request.data.get('pin')
 
         try:
-            pin = Pin.objects.get(pin=str(pin))
+            pin = Pin.objects.get(pin=tr(pin))
 
             if pin.is_expired is True:
                 return Response(

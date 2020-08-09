@@ -32,9 +32,6 @@ services:
       - "1025:1025"
       - "8025:8025"
 
-volumes:
-  pgadmin_data:
-
 networks:
   rabbitmq:
     name: local_rabbitmq

@@ -48,7 +48,6 @@ INSTALLED_APPS = [
 
     # apps
     'apps.user',
-    'apps.avatar',
 ]
 
 if DEBUG:
@@ -157,7 +156,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -174,17 +174,17 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
 
     # Authentication Method.
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    # ),
 }
 
 # =============================== CELERY ==================================== #
 # CELERY
 CELERY_BROKER_URL = 'amqp://{user}:{password}@{server}:5672/'.format(
     user=config('CELERY_USER', default='admin', cast=str),
-    password=config('CELERY_USER', default='admin', cast=str),
-    server=config('CELERY_USER', default='localhost', cast=str),
+    password=config('CELERY_PASSWORD', default='admin', cast=str),
+    server=config('CELERY_SERVER', default='localhost', cast=str),
 )
 
 CELERY_ACCEPT_CONTENT = ['application/json']

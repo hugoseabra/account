@@ -9,7 +9,7 @@ app = Celery('account-service')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app_names = (
-
+    'avatar',
 )
 
 queues = list()

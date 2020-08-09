@@ -32,6 +32,7 @@ cryptography = "*"
 pyjwt = {extras = ["crypto"],version = "*"}
 celery = "*"
 django-stdimage = "*"
+libgravatar = "*"
 
 [requires]
 python_version = "3.7"

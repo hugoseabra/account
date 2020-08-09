@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "38ff2bb3002b9a2fa44a342160ccfde43ef7d739842dbe636ced6c281f49a36c"
+            "sha256": "6092b3f7790f0ddf5837f499ec1bed3c6e66698e3ecb7cb2233d72d650cbb7e5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -250,6 +250,14 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
             "version": "==4.6.11"
+        },
+        "libgravatar": {
+            "hashes": [
+                "sha256:474f90eeac4b17d7178c9657f9be8f0287b1cecf31c9a78181d8053e1323bfe9",
+                "sha256:bff40a1faeb9097da01c791e310fd12a687e38c7950622abfd45d107ca524368"
+            ],
+            "index": "pypi",
+            "version": "==0.2.4"
         },
         "oauthlib": {
             "hashes": [

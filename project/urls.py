@@ -20,7 +20,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('v1/account/', include('apps.user.api_urls')),
+    path('v1/account/', include('apps.user.urls.user_urls')),
+    path('v1/pins/', include('apps.user.urls.pin_urls')),
 ]
 
 # ============================ STATIC CONFIG ================================ #
