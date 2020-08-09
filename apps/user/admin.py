@@ -13,11 +13,13 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
+from libgravatar import Gravatar
 
-from apps.user.models import User
+from apps.user.models import User, Avatar
 
 csrf_protect_m = method_decorator(csrf_protect)
 sensitive_post_parameters_m = method_decorator(sensitive_post_parameters())
@@ -29,7 +31,11 @@ class UserAdmin(admin.ModelAdmin):
     change_user_password_template = None
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'cpf')}),
+        (_('Personal info'), {'fields': ('get_avatar',
+                                         'avatar_type',
+                                         'first_name',
+                                         'last_name',
+                                         'cpf')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups',
                        'user_permissions'),
@@ -46,16 +52,19 @@ class UserAdmin(admin.ModelAdmin):
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm
     list_display = (
+        'get_avatar',
         'email',
         'first_name',
         'last_name',
         'get_cpf_formatted',
         'is_staff'
     )
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    list_filter = (
+        'avatar_type', 'is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
+    readonly_fields = ('get_avatar',)
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -204,4 +213,36 @@ class UserAdmin(admin.ModelAdmin):
     def get_cpf_formatted(self, instance):
         return instance.cpf_formatted
 
+    def get_avatar(self, instance: User):
+        if instance.is_gravatar_avatar:
+            gravatar = Gravatar(instance.email)
+            url = gravatar.get_image(size=80)
+        else:
+            url = instance.avatar.image.thumbnail.url
+
+        content = '<div>'
+        content += f'<img src={url} width="50px" />'
+        content += '</div>'
+        return mark_safe(content)
+
+    list_display_links = ('get_avatar', 'email', 'first_name', 'last_name',)
+    get_avatar.short_description = 'Avatar'
     get_cpf_formatted.short_description = 'CPF'
+
+
+@admin.register(Avatar)
+class AvatarAdmin(admin.ModelAdmin):
+    list_display = ('get_image', 'user', 'image', 'main',)
+    list_filter = ('user', 'main',)
+    search_fields = ('image',)
+    list_display_links = ('get_image', 'user', 'image')
+    fields = ('user', 'get_image', 'image', 'main',)
+    readonly_fields = ('get_image',)
+
+    def get_image(self, instance: Avatar):
+        content = '<div>'
+        content += f'<img src={instance.image.thumbnail.url} width="50px" />'
+        content += '</div>'
+        return mark_safe(content)
+
+    get_image.short_description = 'Avatar'
