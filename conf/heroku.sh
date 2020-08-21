@@ -1,4 +1,5 @@
 #!/bin/bash
+python manage.py makemigrations
 python manage.py migrate
 python manage.py loaddata 000_site_dev
 python manage.py loaddata 000_admin
