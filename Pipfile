@@ -7,49 +7,37 @@ verify_ssl = true
 pylint = "*"
 django-debug-toolbar = "*"
 django-extensions = "*"
-black = "*"
+black = "==19.10b0"
 flake8 = "*"
 
 [packages]
 django = "*"
-# Core
 inquirer = "*"
 drf-nested-routers = "*"
 jsonfield2 = "*"
 django-url-filter = "*"
 django-localflavor = "*"
-# settings
 python-decouple = "*"
 dj-database-url = "*"
 uwsgi = "*"
 psycopg2-binary = "*"
-# Rest
 djangorestframework = "*"
 django-cors-middleware = "*"
-# Project
-django-oauth-toolkit = "*"
 cryptography = "*"
 celery = "*"
 django-stdimage = "*"
 libgravatar = "*"
+pyjwt = {extras = ["crypto"],version = "*"}
 djangorestframework-simplejwt = "*"
 djangorestframework-camel-case = "*"
-# Dependencies Heroku
 gunicorn = "*"
-django-heroku = "*"
-# S3
+django-on-heroku = "*"
 django-storages = "*"
 boto3 = "*"
+dj-rest-auth = {extras =['with_social'], version="*"}
 
 [requires]
 python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
-
-[packages.pyjwt]
-extras = [ "crypto",]
-version = "*"
-
-[packages.dj-rest-auth]
-extras = [ "with-social",]

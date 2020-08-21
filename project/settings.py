@@ -233,8 +233,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 # =============================== HEROKU ==================================== #
 if config('HEROKU', cast=bool, default=False):
-    import django_heroku
-    django_heroku.settings(locals())
+    import django_on_heroku
+    django_on_heroku.settings(locals())
 
     # ================= Configuração do Storage ================================
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
