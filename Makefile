@@ -14,7 +14,6 @@ init:
 	@make load-fixtures
 
 
-
 .PHONY: update-db
 update-db:
 	./manage.py makemigrations
@@ -52,7 +51,7 @@ load-fixtures:
 
 .PHONY: broker_create
 broker_create: broker_kill
-	celery -E $(CELERY_SERVICES) worker -l INFO --logfile="$(CELERY_LOG_FILE)" --pidfile="$(CELERY_PID_FILE)" --detach;
+	celery $(CELERY_SERVICES) worker -l INFO --logfile="$(CELERY_LOG_FILE)" --pidfile="$(CELERY_PID_FILE)" --detach;
 
 
 .PHONY: broker_kill

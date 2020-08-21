@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 from decouple import config, Csv
 from dj_database_url import parse as db_url
@@ -45,6 +46,11 @@ INSTALLED_APPS = [
     # rest-framework
     'rest_framework',
     'stdimage',
+
+    'allauth',
+    'allauth.account',
+    # 'allauth.socialaccount',
+    'dj_rest_auth.registration',
 
     # apps
     'apps.user',
@@ -116,9 +122,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # ========================= USER CONFIGURATION ============================== #
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-)
+AUTHENTICATION_BACKENDS = [
+    'authenticate.backend.ModelBackend',
+]
 
 # Tell Django about the custom `User` model we created. The string
 # `authentication.User` tells Django we are referring to the `User` model in
@@ -126,10 +132,10 @@ AUTHENTICATION_BACKENDS = (
 # called `INSTALLED_APPS`.
 AUTH_USER_MODEL = 'user.User'
 
-LOGIN_URL = reverse_lazy('registration:login')
-LOGOUT_URL = reverse_lazy('registration:logout')
-# LOGIN_REDIRECT_URL = reverse_lazy('driver:driver-list')
-LOGOUT_REDIRECT_URL = reverse_lazy('registration:login')
+# Authentication configuration
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
 
 AVATAR_GRAVATAR_DEFAULT = 'mp'
 AVATAR_GRAVATAR_FORCEDEFAULT = True
@@ -173,11 +179,44 @@ REST_FRAMEWORK = {
         'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 50,
 
-    # Authentication Method.
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser'
+    ]
 }
+
+# ========================= JWT Authenticate configure  ====================== #
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'wind-account'  # Name of cookie in auth request JWT
+
+REST_AUTH_SERIALIZERS = {
+    'JWT_TOKEN_CLAIMS_SERIALIZER': 'authenticate.jwt.TokenObtainPairSerializer'
+}
+
+token_life_time = timedelta(
+    minutes=config('AUTHENTICATION_TOKEN_LIFETIME', cast=int, default=5)
+)
+
+private_key = config('PRIVATE_AUTHENTICATION_KEY')
+public_key = config('PUBLIC_AUTHENTICATION_KEY')
+
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'uuid',
+    'ACCESS_TOKEN_LIFETIME': token_life_time,
+    'VERIFYING_KEY': public_key if not os.path.isfile(public_key) else open(public_key, 'rb').read(),
+    'SIGNING_KEY': private_key if not os.path.isfile(private_key) else open(private_key, 'rb').read(),
+    'ALGORITHM': 'RS256',
+}
+
 
 # =============================== CELERY ==================================== #
 # CELERY
@@ -191,3 +230,16 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 # CELERY_TIMEZONE = TIME_ZONE
+
+# =============================== HEROKU ==================================== #
+if config('HEROKU', cast=bool, default=False):
+    import django_heroku
+    django_heroku.settings(locals())
+
+    # ================= Configuração do Storage ================================
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')  # Key do usuário de acesso
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')  # Chave do usuário de acesso
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')  # Nome do Bucket
+    AWS_LOCATION = 'account-clientize'

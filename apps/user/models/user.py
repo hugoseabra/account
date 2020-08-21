@@ -11,7 +11,7 @@ from core.models.mixins import (
     DateTimeManagementMixin,
     EntityMixin,
 )
-from core.validators import cpf_validator
+from core.validators.cpf_validator import cpf_validator
 from .pin import Pin
 from ..exceptions import PinCreationImpossibility
 
@@ -204,6 +204,10 @@ class User(UUIDPkMixin,
     def is_internal_avatar(self):
         return self.avatar_type == constants.AVATAR_INTERNAL
 
+    @property
+    def username(self):
+        return self.get_username()
+
     def clean(self):
         super().clean()
         self.email = self.__class__.objects.normalize_email(self.email)
@@ -220,7 +224,7 @@ class User(UUIDPkMixin,
         return self.first_name
 
     def save(self, *args, **kwargs):
-        self.username = self.email
+        # self.username = self.email
         super().save(*args, **kwargs)
 
     def deactivate_password(self):
@@ -311,4 +315,4 @@ class User(UUIDPkMixin,
         return self.email
 
     def __repr__(self):
-        return f'<User username={self.email} />'
+        return f'<User username={self.username} />'

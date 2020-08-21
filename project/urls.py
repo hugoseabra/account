@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/account/', include('apps.user.urls.user_urls')),
     path('v1/pins/', include('apps.user.urls.pin_urls')),
+    path('account/auth/', include('dj_rest_auth.urls')),
+    path('account/auth/registration/', include('dj_rest_auth.registration.urls'))
 ]
 
 # ============================ STATIC CONFIG ================================ #

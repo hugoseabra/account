@@ -18,28 +18,11 @@ class UserViewSet(FieldRequestViewsetMixin, ModelViewSet):
     serializer_class = serializers.UserSerializer
     queryset = serializers.UserSerializer.Meta.model.objects.get_queryset()
 
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.BasicAuthentication,
-        authentication.SessionAuthentication,
-    )
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
-
 
 class AvatarViewSet(FieldRequestViewsetMixin, ModelViewSet):
     serializer_class = serializers.AvatarSerializer
     queryset = serializers.AvatarSerializer.Meta.model.objects.get_queryset()
 
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.BasicAuthentication,
-        authentication.SessionAuthentication,
-    )
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
     http_method_names = ['get', 'post', 'delete']
 
     def get_serializer(self, *args, **kwargs):
@@ -85,15 +68,6 @@ class AvatarViewSet(FieldRequestViewsetMixin, ModelViewSet):
 class ReadOnlySingeUserViewset(FieldRequestViewsetMixin, GenericViewSet):
     serializer_class = serializers.UserSerializer
     queryset = serializers.UserSerializer.Meta.model.objects.get_queryset()
-
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.BasicAuthentication,
-        authentication.SessionAuthentication,
-    )
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
 
 
 class AccountValidationViewset(FieldRequestViewsetMixin, GenericViewSet):

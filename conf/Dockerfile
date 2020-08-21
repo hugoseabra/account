@@ -3,7 +3,7 @@
 # docker build --rm -t cgsy .
 # docker tag catalog <repo_url>/cgsy:<tag>
 # -----------------------------------------------------------------------------
-FROM python:3.6-slim
+FROM python:3.8-slim
 
 # Celery does not work with root unless you force it
 ENV C_FORCE_ROOT true
